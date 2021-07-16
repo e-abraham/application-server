@@ -3,6 +3,7 @@ const express = require("express");
 const path = require('path'); //a node native module
 const { sequelize } = require("./db");
 const { Restaurant, Menu, Item } = require('./models/index');
+const { check, validationResult } = require("express-validator"); //add validation to routes
 
 const app = express();
 const port = 3000;
@@ -83,7 +84,17 @@ app.get('/items/name/:name', async (req, res) => {
 })
 
 // Post Restaurant to db, json in request body
-app.post("/restaurants", async (req, res) => {
+app.post("/restaurants", [
+    check("name")
+    .not().isEmpty()
+    .trim()
+    .isLength({max: 49})
+    .escape()
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() })
+    }
     let newRestaurant = await Restaurant.create(req.body)
     res.send("Created a new Restaurant.")
 })
@@ -93,7 +104,15 @@ app.post("/menus", async (req, res) => {
     res.send("Created a new Menu.")
 })
 
-app.post("/items", async (req, res) => {
+app.post("/items", [
+    check("image")
+    .isURL({require_protocol: true})
+    .trim()
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() })
+    }
     let newItem = await Item.create(req.body)
     res.send("Created a new Item.")
 })
@@ -167,6 +186,8 @@ app.patch("/items/:id", async (req, res) => {
 //Q: What will our server be doing? listening to port 3000
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);
+    console.log("dirname: " + __dirname)
+    console.log("path.join: " + path.join(__dirname, 'public'))
 });
 
 /* Curl Request Workaround
