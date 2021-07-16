@@ -23,8 +23,7 @@ app.get("/menus", async (req, res) => {
 })
 //will add routes
 app.get("/flipcoin", async (req, response) => {
-    const randomNum = Math.floor(Math.random() * 2)
-    const coin = ["heads", "tails"][randomNum]
+    const coin = ["heads", "tails"][Math.floor(Math.random() * 2)]
     // res.json(coin) //appears in quotes
     response.send(coin) //no quotes just text
 })
@@ -121,7 +120,7 @@ app.delete('/items/:id', async (req, res) => {
 	res.send("Deleted matching Item!!")
 })
 
-// Update a Restaurant by id
+// Update a Restaurant by id, json in request body
 app.put("/restaurants/:id", async (req, res) => {
 	let updated = await Restaurant.update(req.body, {
 		where : {id : req.params.id} // Update a Restaurant where the id matches, based on req.body
@@ -143,9 +142,26 @@ app.put("/items/:id", async (req, res) => {
 	res.send("Updated matching Item!!")
 })
 
-//need to patch pancake menuid 1, don't know how
-app.patch("items/:id", async (req, res) => {
+//Update Restaurant attribute(s) by id, json in request body
+app.patch("/restaurants/:id", async (req, res) => {
+    let modified = await Restaurant.update(req.body, {
+        where : {id : req.params.id} // Update a Restaurant where the id matches, based on req.body
+    })
+    res.send("Updated attribute(s) in matching Restaurant")
+})
 
+app.patch("/menus/:id", async (req, res) => {
+    let modified = await Menu.update(req.body, {
+        where : {id : req.params.id}
+    })
+    res.send("Updated attribute(s) in matching Menu")
+})
+
+app.patch("/items/:id", async (req, res) => {
+    let modified = await Item.update(req.body, {
+        where : {id : req.params.id}
+    })
+    res.send("Updated attribute(s) in matching Item")
 })
 
 //Q: What will our server be doing? listening to port 3000
